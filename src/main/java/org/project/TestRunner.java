@@ -7,6 +7,6 @@ public class TestRunner {
 
     public static void main(String[] args) {
         MulticastPublisher feedMulticastPublisher = new MulticastPublisher("224.0.0.1", 2000);
-        feedMulticastPublisher.generateFeed(100, 1);
+        feedMulticastPublisher.generateFeed(5, 1);
     }
 }

@@ -14,7 +14,7 @@ public class MulticastPublisher {
 
     private static int MULTICAST_PORT;
     private static String MULTICAST_GROUP;
-    private static String msg = "Test feed message %d";
+    private static String msg = "FeedID %d";
 
     public MulticastPublisher(String mcastGroup, int mcastPort) {
         this.MULTICAST_PORT = mcastPort;
@@ -29,9 +29,9 @@ public class MulticastPublisher {
             mcastSocket.setNetworkInterface(NetworkInterface.getByName("lo"));
             for (int i = 0; i < noPackets; i++) {
                 System.out.println("feed sent ns: " + System.nanoTime());
-                String testFeedMsg = String.format(this.msg, (i));
-
+                String testFeedMsg = String.format(this.msg, (100+i));
                 DatagramPacket packet = new DatagramPacket(testFeedMsg.getBytes(StandardCharsets.US_ASCII), testFeedMsg.getBytes().length);
+                //TODO: datagram vs stream. We have to set destination on each datagram packet.
                 packet.setAddress(McastAddress);
                 packet.setPort(MULTICAST_PORT);
                 mcastSocket.send(packet);
