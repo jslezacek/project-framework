@@ -27,17 +27,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <!--<repositories>-->
-    <!--<repository>-->
-      <!--<id>marketcetera</id>-->
-      <!--<url>http://repo.marketcetera.org/maven</url>-->
-      <!--<snapshots>-->
-        <!--<enabled>true</enabled>-->
-      <!--</snapshots>-->
-    <!--</repository>-->
-  <!--</repositories>-->
-
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -46,19 +35,24 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>jnetpcap</groupId>
-      <artifactId>jnetpcap</artifactId>
-      <version>1.4.r1425-1f</version>
-    </dependency>
-    <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
       <version>1.1.7</version>
     </dependency>
     <dependency>
-      <groupId>org.quickfixj</groupId>
-      <artifactId>quickfixj-core</artifactId>
-      <version>1.6.4</version>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>0.11.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.bootique.kafka.client</groupId>
+      <artifactId>bootique-kafka-client</artifactId>
+      <version>0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.5</version>
     </dependency>
   </dependencies>
 </project>

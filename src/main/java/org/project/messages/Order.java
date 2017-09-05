@@ -1,4 +1,4 @@
-package org.project;
+package org.project.messages;
 
 /**
  * Created by jojo on 7/2/17.

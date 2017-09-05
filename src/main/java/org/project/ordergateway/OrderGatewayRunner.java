@@ -1,9 +1,5 @@
-package org.project;
+package org.project.ordergateway;
 
-/**
- * Hello world!
- *
- */
 public class OrderGatewayRunner
 {
     public static void main( String[] args )
