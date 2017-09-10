@@ -18,14 +18,14 @@ public class OrderGateway implements Runnable {
     private int connectionCounter = 0;
     private ExecutorService service;
     private Integer MAX_MESSAGE_LEN = 1024;
-    private Integer MAX_MESSAGE_COUNT = 10;
+    private Integer MAX_MESSAGE_COUNT = 100;
     private KafkaPublisher kafkaBus;
 
     public OrderGateway(int myPort, String ipAddress)  {
         this.port = myPort;
         this.ipAddress = ipAddress;
         this.service = Executors.newFixedThreadPool(3);
-        this.kafkaBus = new KafkaPublisher("framework:9092");
+        this.kafkaBus = new KafkaPublisher("framework:9092", "measurements");
     }
 
     @Override
@@ -68,7 +68,7 @@ public class OrderGateway implements Runnable {
                 int receivedBytes = 0;
                 byte[] buffer = new byte[MAX_MESSAGE_COUNT * MAX_MESSAGE_LEN]; //buffer to hold messages
 
-                while(activeStream(receivedBytes)) { // permanently listen on TCP data stream until connection broken.
+                while(isConnectAlive(receivedBytes)) { // permanently listen on TCP data stream until connection broken.
                     receivedBytes = inStream.read(buffer, 0, buffer.length); // read some bytes, we don't know if full message or multple messages.
                     orderMsg.parse(receivedBytes, buffer);
                 }
@@ -79,7 +79,7 @@ public class OrderGateway implements Runnable {
 
         }
 
-        public boolean activeStream(Integer receivedBytes) {
+        public boolean isConnectAlive(Integer receivedBytes) {
             // -1: indicates closed connection
             //  0: nothing received but keep listening for new packets arriving
             return receivedBytes >= 0;

@@ -7,10 +7,11 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.Properties;
 
 public class KafkaPublisher {
-
+    String topic;
     Producer producer;
 
-    public KafkaPublisher(String bootstrapServer) {
+    public KafkaPublisher(String bootstrapServer, String topic) {
+        this.topic = topic;
         Properties config = new Properties();
         config.put("bootstrap.servers",bootstrapServer);
         config.put("acks","all");
@@ -23,9 +24,11 @@ public class KafkaPublisher {
         this.producer = new KafkaProducer<String, String>(config);
     }
 
-    public void send(String topic, String message) {
-        System.out.println("Send message to kafka topic: " + topic);
-        this.producer.send(new ProducerRecord(topic, message));
+    public void send(String message) {
+        this.producer.send(new ProducerRecord(this.topic, message));
+    }
+
+    public void flush() {
         this.producer.flush();
     }
 }

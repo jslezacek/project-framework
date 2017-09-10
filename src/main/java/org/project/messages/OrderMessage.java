@@ -1,11 +1,13 @@
 package org.project.messages;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.project.feedpublisher.KafkaPublisher;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 public class OrderMessage {
 
@@ -13,6 +15,7 @@ public class OrderMessage {
     private static final byte MESSAGE_DELIMITER_BYTE = "\u0001".getBytes(StandardCharsets.US_ASCII)[0];
     private static final String FIELD_DELIMITER = "\\|";
     private static KafkaPublisher kafkaBus;
+    private String sourceName = "OrderGateway";
     HashMap<String, String> fieldMap = new HashMap<>();
     HashMap<String, String> fields = new HashMap<>();
 
@@ -21,7 +24,7 @@ public class OrderMessage {
         fieldMap.put("OrderId", "11");
         fieldMap.put("Product", "55");
         fieldMap.put("44", "Price");
-        kafkaBus = new KafkaPublisher("framework:9092");
+        kafkaBus = new KafkaPublisher("framework:9092", "measurements");
     }
 
     public void parse(int receivedBytes, byte[] buffer) {
@@ -34,17 +37,24 @@ public class OrderMessage {
                 String message = new String(buffer, messageStart, delimiter_index - messageStart);     // parse message from last delimiter to current delimiter
                 messageStart = delimiter_index; // start reading from last delimiter position.
                 System.out.println(stripDelimiter(message));
-                long timestamp = System.nanoTime();
                 this.fields = parseFields(message);
-                String benchmarkMsg = "OrderId: " + this.fields.get(fieldMap.get("OrderId")) + " " + timestamp;
-                kafkaBus.send("test", benchmarkMsg);
+//                String benchmarkMsg = "OrderId: " + this.fields.get(fieldMap.get("OrderId")) + " " + timestamp;
+
+                String orderID = this.fields.get(fieldMap.get("OrderId"));
+                long timestamp = System.nanoTime();
+
+                HashMap benchmarkMsg = new HashMap();
+
+                benchmarkMsg.put("sourceId", this.sourceName);
+                benchmarkMsg.put("orderId", orderID);
+                benchmarkMsg.put("orderTs", String.valueOf(timestamp));
+
+                Gson gson = new GsonBuilder().create();
+                kafkaBus.send(gson.toJson(benchmarkMsg));
+
                 System.out.println(benchmarkMsg);
             }
         }
-    }
-
-    public void setKafkaBus(String bootstrapServer) {
-        this.kafkaBus = new KafkaPublisher("framework:9092");
     }
 
     private String[] splitField(String messageBody, String delimiter) {

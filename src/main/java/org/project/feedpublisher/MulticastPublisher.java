@@ -1,5 +1,7 @@
 package org.project.feedpublisher;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.project.TestRunner;
 
 import java.io.IOException;
@@ -8,7 +10,10 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.logging.Level;
 
 /**
@@ -20,11 +25,12 @@ public class MulticastPublisher {
     private static String MULTICAST_GROUP;
     private static String msg = "FeedID %d";
     private KafkaPublisher kafkaBus;
+    private String sourceName = "FeedPublisher";
 
-    public MulticastPublisher(String mcastGroup, int mcastPort) {
+    public MulticastPublisher(String mcastGroup, int mcastPort, KafkaPublisher kafkaBus) {
         this.MULTICAST_PORT = mcastPort;
         this.MULTICAST_GROUP = mcastGroup;
-        this.kafkaBus = new KafkaPublisher("framework:9092");
+        this.kafkaBus = kafkaBus;
     }
 
     public void generateFeed(int noPackets, int throttling) {
@@ -34,10 +40,23 @@ public class MulticastPublisher {
             MulticastSocket mcastSocket = new MulticastSocket(MULTICAST_PORT);
             mcastSocket.setNetworkInterface(NetworkInterface.getByName("lo"));
             for (int i = 0; i < noPackets; i++) {
+                int feedId = 10000 + i;
+                long timestamp = System.nanoTime();
+
+                HashMap benchmarkMsg = new HashMap();
+
+                benchmarkMsg.put("feedId", String.valueOf(feedId));
+                benchmarkMsg.put("feedTs", String.valueOf(timestamp));
+                benchmarkMsg.put("sourceId", this.sourceName);
+
                 String feedSentTimestamp = String.valueOf(System.nanoTime());
-                String testFeedMsg = String.format(this.msg, (100+i)) + feedSentTimestamp;
+                String testFeedMsg = (String.valueOf(feedId));
+
+                Gson gson = new GsonBuilder().create();
+                kafkaBus.send(gson.toJson(benchmarkMsg));
+
                 TestRunner.logger.log(Level.INFO, testFeedMsg);
-                kafkaBus.send("test", testFeedMsg);
+
                 DatagramPacket packet = new DatagramPacket(testFeedMsg.getBytes(StandardCharsets.US_ASCII), testFeedMsg.getBytes().length);
                 //TODO: datagram vs stream. We have to set destination on each datagram packet.
                 packet.setAddress(McastAddress);
@@ -51,5 +70,11 @@ public class MulticastPublisher {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private int getFeedId() {
+        Random rnd = new Random();
+        int minUID = 10000;
+        return minUID + rnd.nextInt(90000);
     }
 }
