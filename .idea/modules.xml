@@ -3,6 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/framework.iml" filepath="$PROJECT_DIR$/framework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/feedpublisher/framework (1).iml" filepath="$PROJECT_DIR$/feedpublisher/framework (1).iml" />
+      <module fileurl="file://$PROJECT_DIR$/ordergateway/framework (2).iml" filepath="$PROJECT_DIR$/ordergateway/framework (2).iml" />
+      <module fileurl="file://$PROJECT_DIR$/feedpublisher/framework.feed.iml" filepath="$PROJECT_DIR$/feedpublisher/framework.feed.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ordergateway/framework.order.iml" filepath="$PROJECT_DIR$/ordergateway/framework.order.iml" />
     </modules>
   </component>
 </project>

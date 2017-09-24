@@ -1,4 +1,4 @@
-package org.project.feedpublisher;
+package org.project.network;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;

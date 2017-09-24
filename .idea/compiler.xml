@@ -6,11 +6,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="framework" />
+        <module name="framework (1)" />
+        <module name="framework (2)" />
+        <module name="framework.feed" />
+        <module name="framework.order" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="framework" target="1.8" />
+      <module name="framework (1)" target="1.8" />
+      <module name="framework (2)" target="1.8" />
+      <module name="framework.feed" target="1.7" />
+      <module name="framework.order" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

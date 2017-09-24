@@ -1,4 +1,4 @@
-package org.project.feedpublisher;
+package org.project.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,8 +11,6 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 import java.util.logging.Level;
 
@@ -41,27 +39,17 @@ public class MulticastPublisher {
             mcastSocket.setNetworkInterface(NetworkInterface.getByName("lo"));
             for (int i = 0; i < noPackets; i++) {
                 int feedId = 10000 + i;
-                long timestamp = System.nanoTime();
-
-                HashMap benchmarkMsg = new HashMap();
-
-                benchmarkMsg.put("feedId", String.valueOf(feedId));
-                benchmarkMsg.put("feedTs", String.valueOf(timestamp));
-                benchmarkMsg.put("sourceId", this.sourceName);
-
-                String feedSentTimestamp = String.valueOf(System.nanoTime());
                 String testFeedMsg = (String.valueOf(feedId));
-
-                Gson gson = new GsonBuilder().create();
-                kafkaBus.send(gson.toJson(benchmarkMsg));
-
                 TestRunner.logger.log(Level.INFO, testFeedMsg);
 
                 DatagramPacket packet = new DatagramPacket(testFeedMsg.getBytes(StandardCharsets.US_ASCII), testFeedMsg.getBytes().length);
                 //TODO: datagram vs stream. We have to set destination on each datagram packet.
                 packet.setAddress(McastAddress);
                 packet.setPort(MULTICAST_PORT);
+
                 mcastSocket.send(packet);
+                sendBenchmark(feedId);
+
                 Thread.sleep(throttling);
             }
 
@@ -70,6 +58,16 @@ public class MulticastPublisher {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendBenchmark(int feedId) {
+        long timestamp = System.nanoTime();
+        HashMap benchmarkMsg = new HashMap();
+        benchmarkMsg.put("feedId", String.valueOf(feedId));
+        benchmarkMsg.put("feedTs", String.valueOf(timestamp));
+        benchmarkMsg.put("sourceId", this.sourceName);
+        Gson gson = new GsonBuilder().create();
+        kafkaBus.send(gson.toJson(benchmarkMsg));
     }
 
     private int getFeedId() {

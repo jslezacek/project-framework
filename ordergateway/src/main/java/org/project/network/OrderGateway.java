@@ -1,4 +1,4 @@
-package org.project.ordergateway;
+package org.project.network;
 
 import java.io.IOException;
 import java.io.InputStream;
