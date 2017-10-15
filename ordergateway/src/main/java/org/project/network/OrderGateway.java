@@ -5,13 +5,14 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.project.network.KafkaPublisher;
-import org.project.messages.OrderMessage;
+import jdk.internal.util.xml.impl.Input;
+import org.project.messages.OrderDecoder;
 
-public class OrderGateway implements Runnable {
+public class OrderGateway  {
 
     final private int port;
     final private String ipAddress;
@@ -21,14 +22,13 @@ public class OrderGateway implements Runnable {
     private Integer MAX_MESSAGE_COUNT = 100;
     private KafkaPublisher kafkaBus;
 
-    public OrderGateway(int myPort, String ipAddress)  {
+    public OrderGateway (int myPort, String ipAddress)  {
         this.port = myPort;
         this.ipAddress = ipAddress;
         this.service = Executors.newFixedThreadPool(3);
         this.kafkaBus = new KafkaPublisher("framework:9092", "measurements");
     }
 
-    @Override
     public void run() {
         System.out.println("Starting orderGateway..");
         try {
@@ -39,7 +39,7 @@ public class OrderGateway implements Runnable {
                 // wait for connection
                 Socket socket = serverSocket.accept();
                 // if connection accpeted, create client thread
-                Thread t = new Thread(new clientConnection(socket));
+                Thread t = new Thread(new clientConnection(socket, this.kafkaBus));
                 String treadName = "OrderThread-"+this.connectionCounter;
                 t.setName(treadName);
                 service.submit(t);
@@ -53,30 +53,33 @@ public class OrderGateway implements Runnable {
 
     private class clientConnection implements Runnable {
         Socket clientSocket;
+        KafkaPublisher kafkaBus;
         String name;
+        List<String> parsedMessages;
+        InputStream inStream;
+        OrderDecoder decoder;
 
-        public clientConnection(Socket socket) {
-            this.clientSocket = socket;
+        public clientConnection(Socket socket, KafkaPublisher kafkaBus) throws IOException {
+            this.inStream = socket.getInputStream();
+            this.kafkaBus = kafkaBus;
+            this.decoder = new OrderDecoder(this.kafkaBus);
         }
 
         @Override
         public void run() {
-
             this.name = Thread.currentThread().getName();
-            OrderMessage orderMsg = new OrderMessage();
-            try (InputStream inStream = this.clientSocket.getInputStream()) {
-                int receivedBytes = 0;
-                byte[] buffer = new byte[MAX_MESSAGE_COUNT * MAX_MESSAGE_LEN]; //buffer to hold messages
+            int receivedBytes = 0;
+            byte[] buffer = new byte[MAX_MESSAGE_COUNT * MAX_MESSAGE_LEN]; //buffer to hold messages
 
-                while(isConnectAlive(receivedBytes)) { // permanently listen on TCP data stream until connection broken.
-                    receivedBytes = inStream.read(buffer, 0, buffer.length); // read some bytes, we don't know if full message or multple messages.
-                    orderMsg.parse(receivedBytes, buffer);
+            while(isConnectAlive(receivedBytes)) { // permanently listen on TCP data stream until connection broken.
+                try {
+                    receivedBytes = this.inStream.read(buffer, 0, buffer.length); // read some bytes, we don't know if full message or multple messages.
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                System.out.println("Connection lost: " + this.name);
-            } catch (IOException e) {
-                e.printStackTrace();
+                parsedMessages = this.decoder.parse(receivedBytes, buffer);
             }
-
+            System.out.println("Connection lost: " + this.name);
         }
 
         public boolean isConnectAlive(Integer receivedBytes) {

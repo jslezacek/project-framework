@@ -51,7 +51,6 @@ public class FeedPublisherRunner {
         this.kafkaBus.flush();
     }
 
-
     public static void main(String[] args) throws IOException, InterruptedException {
         int numMessages = 0;
         String testName = null;
@@ -75,6 +74,6 @@ public class FeedPublisherRunner {
         KafkaPublisher kafkaBus = new KafkaPublisher(kafkaBootstrap, kafkaTopic);
         MulticastPublisher feedPublisher = new MulticastPublisher(feedMcastGroup, feedMcastPort, kafkaBus);
         FeedPublisherRunner testRun = new FeedPublisherRunner(kafkaBus, feedPublisher, testName);
-        testRun.run(numMessages, 1);
+        testRun.run(numMessages, 0);
     }
 }

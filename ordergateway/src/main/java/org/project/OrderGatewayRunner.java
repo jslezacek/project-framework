@@ -19,7 +19,8 @@ public class OrderGatewayRunner
         int orderPort = Integer.parseInt(prop.getProperty("order-port"));
 
         OrderGateway testOrderGateway = new OrderGateway(orderPort, orderListenIp);
-        Thread orderGatewayThread = new Thread(testOrderGateway);
-        orderGatewayThread.start();
+        testOrderGateway.run();
+//        Thread orderGatewayThread = new Thread(testOrderGateway);
+//        orderGatewayThread.start();
     }
 }
